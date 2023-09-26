@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjoeun.dao.RepleDAO">
+
+<!-- insert -->
+
+   <!-- 회원정보 DB에 저장하기 -->
+   <insert id="repleInsert" parameterType="ro">
+		insert into reple (repleIdx, originIdx, masterId, repleId, reple, repleIp, fix, repleNickName, repleGender, repleAge, repleLimitNum, replePhoto) 
+		values (reple_idx_seq.nextval, #{originIdx}, #{masterId}, #{repleId}, #{reple}, #{repleIp}, #{fix}, #{repleNickName}, #{repleGender}, #{repleAge}, #{repleLimitNum}, #{replePhoto})
+   </insert>
+    
+<!-- update -->
+	<!-- 모임 승인 (확정으로 변경) -->
+	<update id="updateJoin" parameterType="int">
+   		update reple set fix = 'Y' where repleIdx = #{repleIdx}
+	</update>
+   
+<!-- delete -->
+	<!-- 모임 거절 -->
+	<delete id="deleteJoin" parameterType="int">
+		delete from reple where repleIdx = #{repleIdx}
+	</delete>
+   
+<!-- select -->
+   	<select id="selectRepleList" parameterType="int" resultType="ro">
+         select * from reple where originIdx = #{originIdx} order by repleIdx desc
+   	</select>
+   
+   	<select id="selectByRepleID" parameterType="String" resultType="ro">
+         select DISTINCT * from reple where repleId = #{repleId} order by repleIdx desc
+   	</select>
+   
+   	<select id="getFixList" parameterType="String" resultType="ro">
+         select DISTINCT * from reple where repleId = #{repleId} order by repleIdx desc
+   	</select>
+   
+   	<!-- 중복된 참여자 아이디 조회 -->
+	<select id="IDCheck" parameterType="String" resultType="int">
+		select count(*) from reple where repleId = #{repleId}
+	</select>
+	
+	<select id="selectRepleId" parameterType="int" resultType="ro">
+		select * from reple where repleIdx = #{repleIdx}
+  	</select>
+  	
+  	
+  	<select id="selectById_Idx" parameterType="ro" resultType="int">
+		select count(*) from reple where originIdx = #{originIdx} and repleId = #{repleId}
+  	</select>
+  	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+

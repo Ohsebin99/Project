@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjoeun.dao.PartyDAO">
+	
+	<!-- 메인글 1건을 저장한다. -->
+	<insert id="insert" parameterType="vo">
+		insert into party (idx, id, nickName, category, location, subject, content, place, partyGender, mealDate, thumbnail, acholchk, ip, minLimitAge, maxLimitAge, limitNum, show, masterPhoto) 
+		values (party_idx_seq.nextval, #{id}, #{nickName}, #{category}, #{location}, #{subject}, #{content}, #{place}, #{partyGender}, #{mealDate}, #{thumbnail}, #{acholchk}, #{ip}, #{minLimitAge}, #{maxLimitAge}, #{limitNum}, 'Y', #{masterPhoto})
+	</insert>
+	
+	<!-- 메인글 전체 개수를 얻어온다. -->
+	<select id="selectCount" resultType="int">
+		select count(*) from party where show = 'Y' and mealDate > SYSDATE ORDER BY mealDate
+	</select>
+	
+	<!-- 1페이지 분량의 메인글을 얻어온다. -->
+	<select id="selectList" parameterType="java.util.HashMap" resultType="vo">
+		<![CDATA[
+		SELECT * from (
+ 		  SELECT ROWNUM rnum, TT.* from(
+ 		    select * from party where show = 'Y' order by idx desc
+  		  ) TT where rownum <= #{endNo}
+		) where rnum >= #{startNo}
+		]]> and mealDate > SYSDATE ORDER BY mealDate
+	</select>
+	<!--  -->
+	<select id="selectCountMulti" parameterType="param" resultType="int">
+	    SELECT COUNT(*) FROM party
+	    <where>
+	        <if test="condition == '내용'">
+	            content LIKE '%' || #{item} || '%'
+	        </if>
+	        <if test="condition == '파티명'">
+	            and subject LIKE '%' || #{item} || '%'
+	        </if>
+	        <if test="condition == '내용+파티명'">
+	            and (content LIKE '%' || #{item} || '%' OR subject LIKE '%' || #{item} || '%')
+	        </if>
+	         <if test="location != '전국'">
+	         	 and location = #{location}
+	        </if>
+	         <if test="acholchk != '음주 여부' and acholchk != '무관'">
+	             and acholchk = #{acholchk}
+	        </if>
+	         <if test="partyGender != '성별' and partyGender != '무관'">
+	        	 and partyGender = #{partyGender}
+	        </if>
+	         <if test="category != '음식 카테고리'">
+	         	 and category = #{category}
+	        </if>
+	        and minLimitAge >= #{minLimitAge}
+	        and show = 'Y'and mealDate > SYSDATE
+	        <![CDATA[and maxLimitAge <= #{maxLimitAge}]]>
+	    </where>
+	    order by idx desc
+	</select>
+	
+	<!--  -->
+	<select id="selectListMulti" parameterType="param" resultType="vo">
+	    SELECT *
+	    FROM (
+	        SELECT ROWNUM rnum, TT.*
+	        FROM (
+	            SELECT *
+	            FROM party
+	            <where>
+	                <if test="condition == '내용'">
+	                    content LIKE '%' || #{item} || '%' 
+	                </if>
+	                <if test="condition == '파티명'">
+	                    and subject LIKE '%' || #{item} || '%' 
+	                </if>
+	                <if test="condition == '내용+파티명'">
+	                    and (content LIKE '%' || #{item} || '%' OR subject LIKE '%' || #{item} || '%') 
+	                </if>
+	                <if test="location != '전국'">
+			         	 and location = #{location}
+			        </if>
+			         <if test="acholchk != '음주 여부' and acholchk != '무관'">
+			             and acholchk = #{acholchk}
+			        </if>
+			         <if test="partyGender != '성별' and partyGender != '무관'">
+			        	 and partyGender = #{partyGender}
+			        </if>
+			         <if test="category != '음식 카테고리'">
+			         	 and category = #{category}
+			        </if>
+			        and minLimitAge >= #{minLimitAge}
+			        and show = 'Y' and mealDate > SYSDATE
+			        <![CDATA[and maxLimitAge <= #{maxLimitAge}]]>			        
+	            </where>
+	            ORDER BY idx DESC
+	            <![CDATA[
+	        ) TT 
+	        WHERE ROWNUM <= #{endNo}
+	    ) 
+	    WHERE rnum >= #{startNo}
+	    ]]>
+	</select>
+	<!-- 내가만든 방 리스트 -->
+	<select id="createMyList" parameterType="vo" resultType="vo">
+		select * from party where id = #{id} and show = 'Y' and mealDate > SYSDATE ORDER BY mealDate
+	</select>
+	
+	<!-- 참여한 방 리스트 -->
+	<select id="joinMyList" parameterType="int" resultType="vo">
+		select * from party where idx = #{idx} and show = 'Y' and mealDate > SYSDATE ORDER BY mealDate
+	</select>
+	
+	<select id="selectByIdx" parameterType="int" resultType="vo">
+		select * from party where idx = #{idx} and show = 'Y' and mealDate > SYSDATE ORDER BY mealDate
+	</select>
+
+	
+	<select id="selectSlider" resultType="vo">
+		SELECT * FROM (
+		SELECT * FROM party WHERE show = 'Y' and mealDate > SYSDATE ORDER BY mealDate
+		)  <![CDATA[WHERE ROWNUM <= 6]]>
+	</select>
+	
+	<!-- 파티 수정 -->
+	<update id="partyUpdate" parameterType="vo">
+		update party set subject = #{subject} , content = #{content} where idx = #{idx}
+	</update>
+	
+	<!-- show 'N'으로 바꾸기 -->
+	<update id="partyDelete" parameterType="vo">
+		update party set show = 'N' where idx = #{idx}
+	</update>
+	
+	<!-- 신고수 1증가 -->
+	<update id="partyReport" parameterType="vo">
+		update party set deleteReport = #{deleteReport} + 1 where idx = #{idx}
+	</update>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
